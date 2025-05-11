@@ -33,7 +33,7 @@ try:
     with st.container():
         st.subheader("📊 Portfolio Overview")
 
-        tab1, tab2 = st.tabs(["📊 My Positions", "🥧 Portfolio Breakdown"])
+        tab1, tab2, tab3 = st.tabs(["📊 My Positions", "🥧 Portfolio Breakdown", "🧪 Placeholder"])
 
         with tab1:
             fig, ax = plt.subplots(figsize=(5, 5))
@@ -53,6 +53,9 @@ try:
             ax2.set_title("Portfolio Breakdown")
             st.pyplot(fig2, use_container_width=False)
             st.markdown("<div style='height:750px; width:750px'></div>", unsafe_allow_html=True)
+
+        with tab3:
+            st.info("This is a placeholder tab for future use.")
 
 except Exception as e:
     st.error(f"❌ Database connection failed:\n{e}")
