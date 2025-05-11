@@ -36,27 +36,23 @@ try:
         tab1, tab2 = st.tabs(["📊 My Positions", "🥧 Portfolio Breakdown"])
 
         with tab1:
-            with st.container():
-                st.markdown("<div style='width:750px; height:550px;'>", unsafe_allow_html=True)
-                fig, ax = plt.subplots(figsize=(7.5, 5.5))
-                bars = ax.bar(df["symbol"], df["market_value"], color="#4CAF50")
-                ax.set_ylabel("Market Value ($)")
-                ax.set_xlabel("Symbol")
-                ax.set_title("My Positions")
-                ax.bar_label(bars, fmt='%.0f', padding=3)
-                st.pyplot(fig, use_container_width=False)
-                st.markdown("</div>", unsafe_allow_html=True)
+            fig, ax = plt.subplots(figsize=(5, 5))
+            bars = ax.bar(df["symbol"], df["market_value"], color="#4CAF50")
+            ax.set_ylabel("Market Value ($)")
+            ax.set_xlabel("Symbol")
+            ax.set_title("My Positions")
+            ax.bar_label(bars, fmt='%.0f', padding=3)
+            st.pyplot(fig, use_container_width=False)
+            st.markdown("<div style='height:550px; width:750px'></div>", unsafe_allow_html=True)
 
         with tab2:
-            with st.container():
-                st.markdown("<div style='width:750px; height:550px;'>", unsafe_allow_html=True)
-                breakdown = df.groupby("security_type")["market_value"].sum()
-                fig2, ax2 = plt.subplots(figsize=(7.5, 5.5))
-                ax2.pie(breakdown, labels=breakdown.index, autopct="%1.1f%%", startangle=90, textprops={"fontsize": 9})
-                ax2.axis("equal")
-                ax2.set_title("Portfolio Breakdown")
-                st.pyplot(fig2, use_container_width=False)
-                st.markdown("</div>", unsafe_allow_html=True)
+            breakdown = df.groupby("security_type")["market_value"].sum()
+            fig2, ax2 = plt.subplots(figsize=(5, 5))
+            ax2.pie(breakdown, labels=breakdown.index, autopct="%1.1f%%", startangle=90, textprops={"fontsize": 9})
+            ax2.axis("equal")
+            ax2.set_title("Portfolio Breakdown")
+            st.pyplot(fig2, use_container_width=False)
+            st.markdown("<div style='height:750px; width:750px'></div>", unsafe_allow_html=True)
 
 except Exception as e:
     st.error(f"❌ Database connection failed:\n{e}")
