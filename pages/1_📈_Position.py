@@ -79,6 +79,15 @@ try:
             st.subheader(f"\U0001F4CB Position Table ({selected_currency})")
             st.write(styled_df)
 
+# --- Totals Display ---
+            total_cb = df["Cost Basis"].sum()
+            total_mv = df["Market Value"].sum()
+            total_ug = df["Unrealized Gain ($)"].sum()
+            st.markdown("**Totals:**")
+            st.markdown(f"- **Total Cost Basis:** {currency_symbol}{total_cb:,.2f}")
+            st.markdown(f"- **Total Market Value:** {currency_symbol}{total_mv:,.2f}")
+            st.markdown(f"- **Total Unrealized Gain:** {currency_symbol}{total_ug:,.2f}")
+
     with col2:
         with st.container(border=True):
             st.subheader("\U0001F967 Portfolio Breakdown")
