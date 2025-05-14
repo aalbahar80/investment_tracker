@@ -25,35 +25,21 @@ try:
         sslmode=SSL_MODE
     )
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM positions ORDER BY symbol;")
+    cursor.execute('SELECT * FROM positions ORDER BY "Symbol";')
     rows = cursor.fetchall()
     columns = [desc[0] for desc in cursor.description]
     df = pd.DataFrame(rows, columns=columns)
-
-    # Rename labels for user-friendly headers
-    df = df.rename(columns={
-        "symbol": "Symbol",
-        "security_type": "Security Type",
-        "quantity": "Quantity",
-        "average_cost_per_unit": "Avg Cost/Unit",
-        "last_price": "Last Price",
-        "cost_basis": "Cost Basis",
-        "market_value": "Market Value",
-        "unrealized_realized_gain_loss_dollars": "Unrealized Gain ($)",
-        "unrealized_realized_gain_loss_percent": "Unrealized Gain (%)",
-        "brokerage_firm": "Brokerage"
-    })
 
     col1, col2 = st.columns([2, 1])
 
     with col1:
         with st.container(border=True):
             st.subheader("📋 Position Table")
-            st.dataframe(df, use_container_width=True)
+            st.dataframe(df.style.hide(axis="index"), use_container_width=True)
 
     with col2:
         with st.container(border=True):
-            st.subheader("🥧 Portfolio Breakdown")
+            st.subheader("🥇 Portfolio Breakdown")
             breakdown = df.groupby("Security Type")["Market Value"].sum()
             fig2, ax2 = plt.subplots(figsize=(5, 5))
             ax2.pie(breakdown, labels=breakdown.index, autopct="%1.1f%%", startangle=90, textprops={"fontsize": 9})
