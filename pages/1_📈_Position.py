@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import psycopg2
@@ -7,13 +8,13 @@ st.set_page_config(page_title="\U0001F4B1 Positions", layout="wide")
 st.title("\U0001F4B1 Positions")
 
 try:
-    # Read secrets from .streamlit/secrets.toml or Streamlit Cloud
-    DB_HOST = st.secrets["database"]["host"]
-    DB_PORT = st.secrets["database"]["port"]
-    DB_NAME = st.secrets["database"]["name"]
-    DB_USER = st.secrets["database"]["user"]
-    DB_PASSWORD = st.secrets["database"]["password"]
-    SSL_MODE = st.secrets["database"].get("sslmode", "require")
+    # --- Hybrid Secrets Reading (Render or Streamlit Cloud) ---
+    DB_HOST = os.environ.get("DB_HOST", st.secrets["database"]["host"])
+    DB_PORT = os.environ.get("DB_PORT", st.secrets["database"]["port"])
+    DB_NAME = os.environ.get("DB_NAME", st.secrets["database"]["name"])
+    DB_USER = os.environ.get("DB_USER", st.secrets["database"]["user"])
+    DB_PASSWORD = os.environ.get("DB_PASSWORD", st.secrets["database"]["password"])
+    SSL_MODE = os.environ.get("SSL_MODE", st.secrets["database"].get("sslmode", "require"))
 
     # Establish connection
     conn = psycopg2.connect(
