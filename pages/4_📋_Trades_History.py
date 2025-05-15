@@ -9,13 +9,13 @@ st.title("📋 Trades History")
 
 # --- Connect to Supabase ---
 try:
-    # --- Hybrid Secrets Reading (Render or Streamlit Cloud) ---
-    DB_HOST = os.environ.get("DB_HOST", st.secrets["database"]["host"])
-    DB_PORT = os.environ.get("DB_PORT", st.secrets["database"]["port"])
-    DB_NAME = os.environ.get("DB_NAME", st.secrets["database"]["name"])
-    DB_USER = os.environ.get("DB_USER", st.secrets["database"]["user"])
-    DB_PASSWORD = os.environ.get("DB_PASSWORD", st.secrets["database"]["password"])
-    SSL_MODE = os.environ.get("SSL_MODE", st.secrets["database"].get("sslmode", "require"))
+    # --- Render-Only Secrets Reading ---
+    DB_HOST = os.environ["DB_HOST"]
+    DB_PORT = os.environ["DB_PORT"]
+    DB_NAME = os.environ["DB_NAME"]
+    DB_USER = os.environ["DB_USER"]
+    DB_PASSWORD = os.environ["DB_PASSWORD"]
+    SSL_MODE = os.environ.get("SSL_MODE", "require")  # optional fallback
 
     # Establish connection
     conn = psycopg2.connect(
