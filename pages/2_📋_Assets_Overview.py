@@ -5,15 +5,23 @@ import psycopg2
 st.set_page_config(page_title="🏦 Assets Overview", layout="wide")
 st.title("🏦 Assets Table")
 
-# Database connection (assumes you're using .streamlit/secrets.toml)
 try:
+    # --- Render-Only Secrets Reading ---
+    DB_HOST = os.environ["DB_HOST"]
+    DB_PORT = os.environ["DB_PORT"]
+    DB_NAME = os.environ["DB_NAME"]
+    DB_USER = os.environ["DB_USER"]
+    DB_PASSWORD = os.environ["DB_PASSWORD"]
+    SSL_MODE = os.environ.get("SSL_MODE", "require")  # optional fallback
+
+    # Establish connection
     conn = psycopg2.connect(
-        host=st.secrets["database"]["host"],
-        port=st.secrets["database"]["port"],
-        dbname=st.secrets["database"]["name"],
-        user=st.secrets["database"]["user"],
-        password=st.secrets["database"]["password"],
-        sslmode=st.secrets["database"].get("sslmode", "require")
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT,
+        sslmode=SSL_MODE
     )
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM assets ORDER BY last_updated DESC;")
