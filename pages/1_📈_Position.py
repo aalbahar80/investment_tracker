@@ -38,75 +38,71 @@ try:
     decimal_places = 2
 
     if selected_currency == "KWD":
-        exchange_rate = 0.31  # 1 USD = 0.31 KWD
-        currency_symbol = "د.ك"  # Dinar symbol
+        exchange_rate = 0.31
+        currency_symbol = "د.ك"
         decimal_places = 3
 
-    # --- Apply exchange rate to numeric columns ---
     numeric_cols = [
-        "Avg Cost/Unit", "Last Price", "Cost Basis", "Market Value", "Unrealized Gain ($)"
+        "Avg Cost/Unit", "Last Price", "Cost Basis", "Market Value", "Unrealized Gain ($)", "Total Return %"
     ]
-
     for col in numeric_cols:
         if col in df.columns:
-            df[col] = df[col].astype(float) * exchange_rate
+            df[col] = df[col].astype(float) * exchange_rate if "Return" not in col else df[col]
 
-    # --- Apply color to return columns ---
     def color_returns(val):
         color = "green" if val > 0 else "red" if val < 0 else "black"
         return f"color: {color}"
 
-    return_columns = ["Unrealized Gain ($)", "Unrealized Gain (%)"]
+    return_columns = ["Unrealized Gain ($)", "Unrealized Gain (%)", "Total Return %"]
+    styled_df = df.style.hide(axis="index").applymap(color_returns, subset=return_columns)
 
-    styled_df = (
-        df.style
-        .hide(axis="index")
-        .format({
-            "Avg Cost/Unit": f"{{:.{decimal_places}f}}",
-            "Last Price": f"{{:.{decimal_places}f}}",
-            "Cost Basis": f"{{:.{decimal_places}f}}",
-            "Market Value": f"{{:.{decimal_places}f}}",
-            "Unrealized Gain ($)": f"{{:.{decimal_places}f}}",
-            "Unrealized Gain (%)": "{:.2f}%"
-        })
-        .applymap(color_returns, subset=return_columns)
-    )
+    # Layout: 2 rows, 2 columns each
+    upper_col1, upper_col2 = st.columns(2)
+    lower_col1, lower_col2 = st.columns(2)
 
-    # --- Layout ---
-    col1, col2 = st.columns([2, 1])
-
-    with col1:
+    with upper_col1:
         with st.container(border=True):
-            st.subheader(f"\U0001F4CB Position Table ({selected_currency})")
-            st.write(styled_df)
+            st.subheader("📋 Position Table")
+            st.dataframe(styled_df, use_container_width=True)
 
-# --- Totals Display ---
+            st.subheader("🧮 Totals")
             total_cb = df["Cost Basis"].sum()
             total_mv = df["Market Value"].sum()
             total_ug = df["Unrealized Gain ($)"].sum()
-            st.markdown("**Totals:**")
-            st.markdown(f"- **Total Cost Basis:** {currency_symbol}{total_cb:,.2f}")
-            st.markdown(f"- **Total Market Value:** {currency_symbol}{total_mv:,.2f}")
-            st.markdown(f"- **Total Unrealized Gain:** {currency_symbol}{total_ug:,.2f}")
+            st.markdown(f"**• Total Cost Basis:** {currency_symbol}{total_cb:,.2f}")
+            st.markdown(f"**• Total Market Value:** {currency_symbol}{total_mv:,.2f}")
+            st.markdown(f"**• Total Unrealized Gain:** {currency_symbol}{total_ug:,.2f}")
 
-    with col2:
+    with upper_col2:
         with st.container(border=True):
-            st.subheader("\U0001F967 Portfolio Breakdown")
+            st.subheader("🥧 Portfolio Breakdown")
             breakdown = df.groupby("Security Type")["Market Value"].sum()
-            fig2, ax2 = plt.subplots(figsize=(5, 5))
-            ax2.pie(breakdown, labels=breakdown.index, autopct="%1.1f%%", startangle=90, textprops={"fontsize": 9})
-            ax2.axis("equal")
-            st.pyplot(fig2, use_container_width=False)
+            fig1, ax1 = plt.subplots(figsize=(5, 5))
+            ax1.pie(breakdown, labels=breakdown.index, autopct="%1.1f%%", startangle=90, textprops={"fontsize": 9})
+            ax1.axis("equal")
+            st.pyplot(fig1, use_container_width=True)
 
-    with st.container(border=True):
-        st.subheader("\U0001F4CA Market Value by Symbol")
-        fig, ax = plt.subplots(figsize=(7, 5))
-        bars = ax.bar(df["Symbol"], df["Market Value"], color="#4CAF50")
-        ax.set_ylabel(f"Market Value ({currency_symbol})")
-        ax.set_xlabel("Symbol")
-        ax.set_title("My Positions")
-        ax.bar_label(bars, fmt='%.0f', padding=3)
-        st.pyplot(fig, use_container_width=False)
+    with lower_col1:
+        with st.container(border=True):
+            st.subheader("📈 Market Value by Symbol")
+            df_sorted_mv = df.sort_values("Market Value", ascending=True)
+            fig2, ax2 = plt.subplots(figsize=(6, len(df) * 0.5))
+            bars = ax2.barh(df_sorted_mv["Symbol"], df_sorted_mv["Market Value"], color="#4CAF50")
+            ax2.set_xlabel(f"Market Value ({currency_symbol})")
+            ax2.set_title("Market Value Distribution")
+            ax2.bar_label(bars, fmt='%.0f', padding=3)
+            st.pyplot(fig2, use_container_width=True)
+
+    with lower_col2:
+        with st.container(border=True):
+            st.subheader("📊 Total Return by Symbol")
+            df_sorted_ret = df.sort_values("Total Return %", ascending=True)
+            fig3, ax3 = plt.subplots(figsize=(6, len(df) * 0.5))
+            bars_ret = ax3.barh(df_sorted_ret["Symbol"], df_sorted_ret["Total Return %"], color="#2196F3")
+            ax3.set_xlabel("Total Return (%)")
+            ax3.set_title("Total Return per Symbol")
+            ax3.bar_label(bars_ret, fmt='%.2f%%', padding=3)
+            st.pyplot(fig3, use_container_width=True)
 
 except Exception as e:
-    st.error(f"\u274C Database connection failed:\n{e}")
+    st.error(f"❌ Database connection failed:\n{e}")
